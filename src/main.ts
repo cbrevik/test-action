@@ -35,14 +35,4 @@ export async function run() {
     throw error;
   }
 }
-
-function getPrNumber(): number | undefined {
-  const pullRequest = github.context.payload.pull_request;
-  if (!pullRequest) {
-    return undefined;
-  }
-
-  return pullRequest.number;
-}
-
 run();
