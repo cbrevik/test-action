@@ -1,5 +1,7 @@
 import * as core from '@actions/core';
 import * as github from '@actions/github';
+import prettier from "prettier"
+import { file } from '@babel/types';
 
 export async function run() {
   try {
@@ -24,15 +26,46 @@ export async function run() {
       pull_number: pull_request.number
     });
 
+    var fileShas = prFilesResponse.data.map(f => ({ sha: f.sha, filename: f.filename }));
+
+    const fileContents = await Promise.all(fileShas.map(({ filename, sha }) => getContent(client, owner, repo, filename, sha)));
+
+    const formattedFiles = await Promise.all(fileContents.map(async ({ filename, content }) => {
+      const fileInfo = await prettier.getFileInfo(filename);
+      return {
+        formattedContent: prettier.format(content, { parser: fileInfo.inferredParser }),
+        filename
+      }
+    }));
+
+    console.log(formattedFiles);
+
     await client.issues.createComment({
       owner: owner,
       repo: repo,
       issue_number: pull_request.number,
-      body: `These are the changed files: ${prFilesResponse.data.map((file) => file.filename).join(", ")}`
+      body: `These are your files, except formatted:\n ${formattedFiles.map((file) => `${file.filename}:${file.formattedContent}`).join("\n")}`
     });
   } catch (error) {
     core.setFailed(error.message);
     throw error;
   }
 }
+
+async function getContent(client: github.GitHub, owner: string, repo: string, path: string, ref: string) {
+  var contentResponse = await client.repos.getContents({
+    owner,
+    repo,
+    path,
+    ref
+  });
+
+  const { data: { content } } = (contentResponse as any);
+
+  return {
+    filename: path,
+    content
+  }
+}
+
 run();

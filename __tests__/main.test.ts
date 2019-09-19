@@ -15,14 +15,12 @@ describe('action test suite', () => {
       .persist()
       .get('/repos/foo/bar/pulls/10/files')
       .reply(200, [
-          { filename: "README.md" },
-          { filename: "index.html" },
-          { filename: "amazingcode.js" }
+          { filename: "README.md" }
         ]);
 
     nock('https://api.github.com')
       .persist()
-      .post('/repos/foo/bar/issues/10/comments', "{\"body\":\"These are the changed files: README.md, index.html, amazingcode.js\"}")
+      .post('/repos/foo/bar/issues/10/comments', "{\"body\":\"These are the changed files: README.md\"}")
       .reply(200);
 
     const main = require('../src/main');

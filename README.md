@@ -7,3 +7,19 @@ This template offers an easy way to get started writing a JavaScript action with
 See the walkthrough located [here](https://github.com/actions/toolkit/blob/master/docs/typescript-action.md).
 
 In addition to walking your through how to create an action, it also provides strategies for versioning, releasing and referencing your actions.
+
+## Example workflow
+
+```yml
+name: "LETS DO THIS"
+on:
+- pull_request
+    
+jobs:
+  hello:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: cbrevik/test-action@v3
+      with:
+        repo-token: "${{ secrets.GITHUB_TOKEN }}"
+```
