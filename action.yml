@@ -1,10 +1,10 @@
-name: 'Your name here'
-description: 'Provide a description here'
-author: 'Your name or organization here'
+name: 'Hello'
+description: 'Just testing actions, hello world'
+author: 'Christian'
 inputs:
-  myInput:              # change this
-    description: 'input description here'
-    default: 'default value if applicable'
+  name:
+    description: 'The name to say hello to'
+    default: 'World'
 runs:
   using: 'node12'
   main: 'lib/main.js'
