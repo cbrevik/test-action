@@ -13,7 +13,7 @@ export async function run() {
         console.log('No pull request was opened or edited, skipping');
         return;
       }
-      
+
     const repoToken: string = core.getInput('repo-token', {required: true});
 
     const client: github.GitHub = new github.GitHub(repoToken);
@@ -21,14 +21,16 @@ export async function run() {
     const { owner, repo } = github.context.repo;
 
     const prFilesResponse = await client.pulls.listFiles({
-      owner: owner,
-      repo: repo,
+      owner,
+      repo,
       pull_number: pull_request.number
     });
 
+    
+
     var fileShas = prFilesResponse.data.map(f => ({ sha: f.sha, filename: f.filename }));
 
-    const fileContents = await Promise.all(fileShas.map(({ filename, sha }) => getContent(client, owner, repo, filename, sha)));
+    const fileContents = await Promise.all(fileShas.map(({ filename }) => getContent(client, owner, repo, filename, pull_request.head.ref)));
 
     const formattedFiles = await Promise.all(fileContents.map(async ({ filename, content }) => {
       const fileInfo = await prettier.getFileInfo(filename);
