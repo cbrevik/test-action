@@ -56,7 +56,7 @@ export async function handleRequestedAction(payload: WebhookPayload) {
 export async function run() {
   try {
     
-    const { eventName, action } = github.context.payload;
+    const { eventName, action } = github.context;
     
     if (eventName ===  "pull_request"
       && (action === 'opened' || action === 'edited' || action === 'synchronize')) {
