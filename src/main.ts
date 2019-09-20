@@ -13,6 +13,8 @@ export async function run() {
         return;
       }
 
+    const { ref: headRef, sha: headSha }  = pull_request.head;
+
     const repoToken: string = core.getInput('repo-token', {required: true});
 
     const client: github.GitHub = new github.GitHub(repoToken);
@@ -25,28 +27,28 @@ export async function run() {
       pull_number: pull_request.number
     });
 
-    
-
     var fileShas = prFilesResponse.data.map(f => ({ sha: f.sha, filename: f.filename }));
 
-    const fileContents = await Promise.all(fileShas.map(({ filename }) => getContent(client, owner, repo, filename, pull_request.head.ref)));
+    const fileContents = await Promise.all(fileShas.map(({ filename }) => getContent(client, owner, repo, filename, headRef)));
 
     const formattedFiles = await Promise.all(fileContents.map(async ({ filename, content }) => {
       const fileInfo = await prettier.getFileInfo(filename);
       return {
-        formattedContent: prettier.format(content, { parser: fileInfo.inferredParser }),
+        shouldFormat: prettier.check(content, { parser: fileInfo.inferredParser }),
         filename
       }
     }));
 
-    console.log(formattedFiles);
-
-    await client.issues.createComment({
-      owner: owner,
-      repo: repo,
-      issue_number: pull_request.number,
-      body: `These are your files, except formatted:\n ${formattedFiles.map((file) => `${file.filename}:${file.formattedContent}`).join("\n")}`
-    });
+    await client.checks.create({
+      owner,
+      repo,
+      name: "Check if needs to be formatted",
+      head_sha: headSha,
+      conclusion: "action_required",
+      actions: [
+        { label: "Fix formatting", description: "Fix formatting of file", identifier: "FORMATY_FOX" }
+      ]
+    })
   } catch (error) {
     core.setFailed(error.message);
     throw error;
