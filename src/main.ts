@@ -1,7 +1,6 @@
 import * as core from '@actions/core';
 import * as github from '@actions/github';
 import prettier from "prettier"
-import { file } from '@babel/types';
 
 export async function run() {
   try {
@@ -35,7 +34,6 @@ export async function run() {
     const formattedFiles = await Promise.all(fileContents.map(async ({ filename, content }) => {
       const fileInfo = await prettier.getFileInfo(filename);
       return {
-        content = Buffer.from(result.data.content, 'base64').toString()
         formattedContent: prettier.format(content, { parser: fileInfo.inferredParser }),
         filename
       }
