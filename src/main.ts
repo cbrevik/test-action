@@ -35,6 +35,7 @@ export async function run() {
     const formattedFiles = await Promise.all(fileContents.map(async ({ filename, content }) => {
       const fileInfo = await prettier.getFileInfo(filename);
       return {
+        content = Buffer.from(result.data.content, 'base64').toString()
         formattedContent: prettier.format(content, { parser: fileInfo.inferredParser }),
         filename
       }
@@ -55,14 +56,14 @@ export async function run() {
 }
 
 async function getContent(client: github.GitHub, owner: string, repo: string, path: string, ref: string) {
-  var contentResponse = await client.repos.getContents({
+  var result = await client.repos.getContents({
     owner,
     repo,
     path,
     ref
   });
 
-  const { data: { content } } = (contentResponse as any);
+  const content = Buffer.from((result as any).data.content, 'base64').toString()
 
   return {
     filename: path,
