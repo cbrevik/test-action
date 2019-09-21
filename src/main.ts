@@ -25,7 +25,7 @@ export async function handlePullRequest(payload: WebhookPayload)
     pull_number: pull_request.number
   });
 
-  var fileShas = prFilesResponse.data.map(f => ({ sha: f.sha, filename: f.filename }));
+  var fileShas = prFilesResponse.data.map(f => ({ filename: f.filename }));
 
   const fileContents = await Promise.all(fileShas.map(({ filename }) => getContent(client, owner, repo, filename, headRef)));
 
@@ -44,7 +44,7 @@ export async function handlePullRequest(payload: WebhookPayload)
     head_sha: headSha,
     conclusion: "action_required",
     actions: [
-      { label: "Fix formatting", description: "Fix formatting of file", identifier: "FORMATY_FOX" }
+      { label: "Fix formatting", description: "Fix formatting of file", identifier: "FORMATY_FOX" }
     ]
   })
 }
@@ -57,13 +57,15 @@ export async function run() {
   try {
     
     const { eventName, payload: { action } } = github.context;
-    
+    console.log(`Action called with event '${eventName}' and action '${action}'`);
+
     if (eventName ===  "pull_request"
-      && (action === 'opened' || action === 'edited' || action === 'synchronize')) {
+      && (action === 'opened' || action === 'synchronize')) {
       handlePullRequest(github.context.payload)
-    }
-    if (eventName === "check_run" && action === "requested_action") {
+    } else if (eventName === "check_run" && action === "requested_action") {
       handleRequestedAction(github.context.payload)
+    } else {
+      console.log("Nothing to do..")
     }
   } catch (error) {
     core.setFailed(error.message);
