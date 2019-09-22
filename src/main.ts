@@ -45,7 +45,12 @@ export async function handlePullRequest(payload: WebhookPayload)
     conclusion: "action_required",
     actions: [
       { label: "Fix formatting", description: "Fix formatting of file", identifier: "FORMATY_FOX" }
-    ]
+    ],
+    output: 
+      { summary: "That file wasn't formatted properly",
+        text: "Long text probably",
+        title: "Ooops", }
+    
   })
 }
 
